@@ -1,0 +1,312 @@
+@import "./assets/styles/cardAdminHome.css";
+@import "./assets/styles/chart.css";
+@import "./assets/styles/menu.css";
+@import "./assets/styles/seguimientos.css";
+@import "./assets/styles/sidebar.css";
+
+/* Estilos predeterminados del sistema*/
+*{margin: 0px; padding: 0px;}
+
+:root {
+    --color-primary: #661d75;
+    --color-secondary: #E88E21;
+    --color-white: #fff;
+    --color-black: #000;
+    --color-background: #ebe9e9;
+    --color-danger: #bb2124;
+    --color-success: #157347;
+    --color-tuple: #e8e8e8;
+    --color-datatext: #1976d2;
+    --color-background-light: #f0f5ff;
+    --color-secondary-light:#d7dbdd ;
+    --color-bitacora: #797d7f;
+  }
+
+/* Body */
+body{font-family: "Soberana Sans Regular", sans-serif !important; background-color: var(--color-background) !important;}
+
+/* Estilo de scroll general */
+::-webkit-scrollbar{
+    width: 5px !important;
+    height: 5px !important;
+}
+
+::-webkit-scrollbar-thumb{
+    background-color: var(--color-primary) !important;
+    border-radius: 10px;
+}
+
+.full-width{
+  max-width: 100% !important;
+  flex: 0 0 100% !important;
+  width: 100% !important;
+  background-color: var(--color-background) !important;
+}
+
+a {
+  color: var(--color-black);
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+/* Contenido */
+.main .content {
+  width: 82%;
+  flex: 0 0 82%;
+}
+
+.right-content {
+  padding: 90px 30px;
+}
+
+/* Card */
+.card{
+  border-radius: 8px !important;
+  border: none;
+}
+
+/* Selector predeterminado */
+.select-filter {
+  padding: 9px;
+  font-size: 14px;
+  width: auto;
+  border: 1px solid var(--color-secondary-light);
+  border-radius: 4px;
+  background-color: var(--color-white);
+  color: var(--color-primary);
+}
+
+.select-filter:focus {
+  outline: none;
+  border-color: var(--color-datatext);
+}
+
+.right-content .contentWrraperSelect{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 50px;
+}
+
+/* Header */
+header{
+  width: 100%; 
+  height: 70px; /* 80 Equivale a 5rem y 70 a 3.375rem*/
+  background: var(--color-white);
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  z-index: 1000;
+  /* box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2); */
+  border-bottom: 3.5px solid var(--color-primary); /* Puedes cambiar el color y el grosor */
+}
+
+header .part2{
+  padding-left: 25px !important;
+}
+
+header .logo{
+  text-decoration: none;
+}
+
+header .logo img{
+  width: 190px;
+}
+
+header .logo span{
+  color: var(--color-black);
+  font-weight: 600;
+  font-size: 24px;
+}
+
+/* Botón circular de menú y otros */
+header button.rounded-circle{
+  min-width: 40px !important;
+  width: 40px !important;
+  height: 40px !important;
+  background: var(--color-background-light);
+}
+
+header button.rounded-circle svg{
+  color: var(--color-primary); 
+  font-size: 18px;
+  transition: all 0.4s;
+}
+
+header button.rounded-circle svg:hover{
+  color: var(--color-datatext) !important; 
+}
+
+/* Header -> Perfil de usuario */
+.myAcc{
+  text-align: left !important;
+  text-transform: none !important;
+}
+
+.myAcc .userImg{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--color-primary);
+  padding: 2px;
+  border-radius: 100%
+}
+
+.myAcc .userImg .rounded-circle{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+  position: relative;
+}
+
+.myAcc .userImg .rounded-circle img{
+  object-fit: cover;
+  width: 100%;
+  height: 100%;
+}
+
+.myAcc .userInfo{
+  padding-left: 10px;
+}
+
+.myAcc .userInfo h4{
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 0px;
+}
+
+.myAcc .userInfo p{
+  font-size: 12px;
+  margin-top: 0px;
+  color: var(--color-black);
+  opacity: 0.7;
+}
+
+/* Estilos por defecto neutralizados del elemento Link */
+.myAcc .menu-link {
+  text-decoration: none; 
+  color: inherit; 
+}
+
+.myAcc .menu-link:active,
+.menu-link:hover {
+  color: inherit;
+  background: none;
+  box-shadow: none;
+}
+
+/* Tabla */
+
+/* Estilos de tabla predeterminada */
+  
+.card .tittle-table{
+  margin-left: 20px;
+  color: var(--color-datatext);
+}
+
+.table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.search-bar {
+  flex: 1;
+  max-width: 300px;
+  margin-right: 16px;
+}
+
+/* Estilos de tabla */
+
+.table-container {
+  width: 100%;
+  margin: 10px;
+  overflow-x: auto;
+  border-radius: 8px;
+}
+
+.styled-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+  color: var(--color-black);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.styled-table thead tr {
+  background-color: var(--color-primary) !important;
+  color: var(--color-white);
+  text-align: left;
+} /* Bordes superiores e inferiores */
+
+.styled-table th,
+.styled-table td {
+  padding: 7px 12px;
+}
+
+.styled-table tbody tr {
+  border-bottom: 1px solid var(--color-background) !important;
+  background: var(--color-tuple);
+  transition: background-color 0.3s ease;
+}
+
+.styled-table tbody tr:nth-of-type(even) {
+  background-color: var(--color-white);
+}
+
+.styled-table tbody tr.active-row {
+  background-color: var(--color-white);
+}
+
+/* SearchBox o Buscador */
+.searchBox{
+  width: 400px; 
+  height: 40px; 
+  background: var(--color-background-light); 
+  border-radius: 6px;
+  padding: 3px 15px;
+}
+
+.searchBox input{
+  background: transparent;
+  border: 0px;
+  outline: none;
+  padding-left: 5px;
+  font-size: 15px;
+  color: var(--color-primary);
+}
+
+.searchBox .clear-btn {
+  position: absolute;
+  right: 15px; /* Espaciado desde el borde derecho */
+  background: transparent;
+  border: none;
+  color: var(--color-primary);
+  cursor: pointer;
+}
+
+.searchBox .clear-btn svg{
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.searchBox .clear-btn:hover {
+  color: rgba(0, 0, 0, 0.7);
+}
+
+.searchBox input::-webkit-input-placeholder{
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.searchBox svg{
+  font-size: 18px;
+  color: var(--color-primary);
+}

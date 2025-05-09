@@ -1,0 +1,93 @@
+.card {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 15px;
+    transition: transform 0.2s;
+}
+
+.border-left-primary {
+    border-left: 5px solid #4e73df;
+}
+.border-left-success {
+    border-left: 5px solid #1cc88a;
+}
+.border-left-info {
+    border-left: 5px solid #36b9cc;
+}
+.border-left-warning {
+    border-left: 5px solid #bb2124;
+}
+
+.card-body {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.text-xs {
+    font-size: 0.85rem;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.h5 {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #333;
+}
+
+.text-gray-800 {
+    color: #5a5c69;
+}
+
+.progress {
+    background-color: #e0e0e0;
+    height: 8px;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-bar {
+    height: 100%;
+    border-radius: 4px;
+}
+
+/* Estilos para los iconos */
+.icon {
+    font-size: 2rem;
+    color: #4e73df;
+}
+
+.icon-success {
+    color: #1cc88a;
+}
+
+.icon-info {
+    color: #36b9cc;
+}
+
+.icon-warning {
+    color: #bb2124;
+}
+
+/* Estilos para la tabla */
+.table {
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+/* Estilos para los botones */
+.btn {
+    font-size: 1rem;
+    padding: 10px 20px;
+    border-radius: 5px;
+}
+
+/* Estilos para las cartas de análisis */
+.card {
+    margin-top: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
