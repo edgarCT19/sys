@@ -1,4 +1,3 @@
-import React from "react";
 import {
     Button,
     TextField,
@@ -89,6 +88,15 @@ const Add_Mantenimiento = () => {
                       Información del equipo
                     </Typography>
                     <Divider sx={{ marginBottom: 2 }} />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <FormControl fullWidth>
+                      <InputLabel>Tipo de mantenimiento</InputLabel>
+                      <Select label="Tipo de mantenimiento" defaultValue="">
+                        <MenuItem value="Preventivo">Mantenimiento preventivo</MenuItem>
+                        <MenuItem value="Correctivo">Mantenimiento correctivo</MenuItem>
+                      </Select>
+                    </FormControl>
                   </Grid>
                   <Grid item xs={12} sm={6}>
                     <FormControl fullWidth>

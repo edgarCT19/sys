@@ -1,4 +1,3 @@
-import React from "react";
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
@@ -28,6 +27,15 @@ import Altas_Pendientes from "./pages/Pendientes/altas";
 import Rendimiento_Personal from "./pages/Reports/rend_personal";
 import Rendimiento_General from "./pages/Reports/rend_general";
 import Seguimientos from "./pages/Seguimientos/seguimientos";
+import Add_Users from "./pages/Usuarios/add_form";
+import Edit_Departamento from "./pages/Departamento/edit_form";
+import Add_Departamento from "./pages/Departamento/add_form";
+import Add_Atraso from "./pages/Atrasos/add_form";
+import Edit_Atraso from "./pages/Atrasos/edit_form";
+import Atrasados from "./pages/Atrasos/atrasados";
+import Add_Area from "./pages/Areas/add_form";
+import Edit_Area from "./pages/Areas/edit_form";
+import Edit_User from "./pages/Usuarios/edit_form";
 
 
 function AppContent() {
@@ -65,7 +73,9 @@ function AppContent() {
             <Route path="/agregar_registro" element={<Add_Dashboard></Add_Dashboard>} />
             <Route path="/editar_registro" element={<Edit_Dashboard></Edit_Dashboard>} />
             {/* URL's de registros de usuarios */}
-            <Route path="/registro_usuarios" element={<Usuarios></Usuarios>} />
+            <Route path="/registro_ingenieros" element={<Usuarios></Usuarios>} />
+            <Route path="/agregar_ingeniero" element={<Add_Users></Add_Users>} />
+            <Route path="/editar_ingeniero" element={<Edit_User></Edit_User>} />
             {/* URL's de mantenimientos */}
             <Route path="/registros_mantenimientos" element={<Mantenimientos></Mantenimientos>} />
             <Route path="/agregar_registro_mantenimiento" element={<Add_Mantenimiento></Add_Mantenimiento>} />
@@ -76,11 +86,22 @@ function AppContent() {
             <Route path="/rendimiento_personal" element={<Rendimiento_Personal></Rendimiento_Personal>} />
             <Route path="/rendimiento_general" element={<Rendimiento_General></Rendimiento_General>} />
             <Route path="/grafica_pastel" element={<Chart_pie></Chart_pie>} />
-            {/* URL's del panel lateral */}
-            <Route path="/departamentos" element={<Departamento></Departamento>} />
+            {/* URL's de áreas */}
             <Route path="/areas" element={<Areas></Areas>} />
-            <Route path="/desempeños" element={<Desempeno></Desempeno>} />
+            <Route path="/agregar_area" element={<Add_Area></Add_Area>} />
+            <Route path="/editar_area" element={<Edit_Area></Edit_Area>} />
+            {/*  URL's de departamentos */}
+            <Route path="/departamentos" element={<Departamento></Departamento>} />
+            <Route path="/agregar_departamento" element={<Add_Departamento></Add_Departamento>} />
+            <Route path="/editar_departamento" element={<Edit_Departamento></Edit_Departamento>} />
+            {/*  URL's de mantenimientos pendientes */}
             <Route path="/altas_pendientes" element={<Altas_Pendientes></Altas_Pendientes>} />
+            {/*  URL's de atrasos */}
+            <Route path="/agregar_atraso" element={<Add_Atraso></Add_Atraso>} />
+            <Route path="/editar_atraso" element={<Edit_Atraso></Edit_Atraso>} />
+            <Route path="/mantenimientos_atrasados" element={<Atrasados></Atrasados>} />
+            {/* Otros */}
+            <Route path="/desempeños" element={<Desempeno></Desempeno>} />
           </Routes>
         </div>
       </div>

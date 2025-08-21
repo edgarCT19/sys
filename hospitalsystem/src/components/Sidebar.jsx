@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { ExpandMore, ExpandLess, Dashboard, Settings, Info, 
   BarChart, TableView, Engineering, Apartment, AssuredWorkload, 
-  Handyman, Assignment, Devices, PendingActions, Checklist } from "@mui/icons-material";
+  Handyman, Assignment, Devices, PendingActions, Checklist, VerifiedUser, ManageHistory } from "@mui/icons-material";
 import { List, ListItem, ListItemText, ListItemIcon, Collapse, Divider } from "@mui/material";
 import { Link } from "react-router-dom";
 import "../assets/styles/sidebar.css";
@@ -15,13 +15,19 @@ const menuItems = [
       { text: "Gestión de equipos", icon: <Devices style={{color:"var(--color-secondary)"}} />, path:"/registros_equipos" },
       { text: "Departamentos", icon: <Apartment style={{color:"var(--color-secondary)"}} />,  path:"/departamentos" },
       { text: "Áreas", icon: <AssuredWorkload style={{color:"var(--color-secondary)"}} />,  path:"/areas" },
-      { text: "Personal", icon: <Engineering style={{color:"var(--color-secondary)"}} />,  path:"/registro_usuarios" },
+      { text: "Ingenieros", icon: <Engineering style={{color:"var(--color-secondary)"}} />,  path:"/registro_ingenieros" },
+      { text: "Administradores", icon: <VerifiedUser style={{color:"var(--color-secondary)"}} />,  path:"/registro_administradores" },
     ],
   },
   {
     text: "Pendientes",
     icon: <PendingActions style={{color:"var(--color-primary)"}} />, 
     path: "/altas_pendientes",
+  },
+    {
+    text: "Atrasos",
+    icon: <ManageHistory style={{color:"var(--color-primary)"}} />, 
+    path: "/mantenimientos_atrasados",
   },
   {
     text: "Seguimientos",

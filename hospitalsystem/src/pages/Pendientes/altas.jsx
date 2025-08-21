@@ -9,6 +9,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import BuildIcon from "@mui/icons-material/Build";
 import Search from "../../components/Search";
 import Paginacion from "../../components/Pagination";
+import { Link } from "react-router";
 
 const Altas_Pendientes = () => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -78,9 +79,11 @@ const Altas_Pendientes = () => {
         <div className="card">
         <div className="table-header d-flex justify-content-end align-items-center mt-2 mb-3 p-2">
             <Search onSearch={handleSearch} className="search-bar" />
-            <Button variant="contained" className="mx-2" color="success" endIcon={<AddCircleOutlineIcon />}>
-            Agregar
-            </Button>
+            <Link to="/agregar_atraso">
+              <Button variant="contained" className="mx-2" color="success" endIcon={<AddCircleOutlineIcon />}>
+              Agregar
+              </Button>
+            </Link>
         </div>
         <div className="d-flex justify-content-center align-items-center">
             <div className="table-container">

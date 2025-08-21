@@ -65,7 +65,7 @@ const Usuarios = () => {
       <div className="card mt-2">
         <div className="table-header d-flex justify-content-end align-items-center mt-2 mb-3 p-2">
           <Search onSearch={handleSearch} />
-          <Link to="/agregar_usuario">
+          <Link to="/agregar_ingeniero">
             <Button variant="contained" className="mx-2" color="success" endIcon={<AddCircleOutlineIcon />}>
               Agregar
             </Button>
@@ -101,7 +101,7 @@ const Usuarios = () => {
                       <td style={{ fontSize: "0.8em", wordBreak: "break-word" }}>{item.contraseña}</td>
                       <td>
                         <Stack direction="row" spacing={1}>
-                          <Link to="/editar_usuario">
+                          <Link to="/editar_ingeniero">
                             <Tooltip title="Editar">
                               <IconButton size="small" color="primary">
                                 <EditIcon fontSize="small" />
