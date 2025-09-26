@@ -1,24 +1,33 @@
 import React, { useState } from "react";
+import {
+  Button,
+  TextField,
+  Grid,
+  Typography,
+  Box,
+  CircularProgress,
+} from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import { Button, TextField, Grid, Typography, Box, CircularProgress } from "@mui/material";
 import Swal from "sweetalert2";
 
-const Add_Users = () => {
+const Agregar_Admin = () => {
   const navigate = useNavigate();
+
   const [formValues, setFormValues] = useState({
     nombres: "",
     apellido_paterno: "",
     apellido_materno: "",
-    genero: true,
+    genero: "",
     telefono: "",
     email: "",
   });
+
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormValues((prev) => ({ ...prev, [name]: value }));
+    setFormValues({ ...formValues, [name]: value });
   };
 
   const handleSubmit = async (e) => {
@@ -28,78 +37,80 @@ const Add_Users = () => {
 
     try {
       const token = localStorage.getItem("token");
-      if (!token) {
-        setErrorMsg("Usuario no autenticado");
-        setLoading(false);
-        return;
-      }
+      if (!token) throw new Error("Usuario no autenticado");
 
       const response = await fetch(
-        "https://biomedcontrol-api.onrender.com/api/ingenieros",
+        "https://biomedcontrol-api.onrender.com/api/administradores",
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify(formValues),
+          body: JSON.stringify({
+            ...formValues,
+            genero: formValues.genero === "true",
+          }),
         }
       );
 
-      const result = await response.json();
-
-      if (response.ok && !result.has_error) {
-        const generatedPassword = result.data.generated_password;
-
-        // Limpiar formulario
-        setFormValues({
-          nombres: "",
-          apellido_paterno: "",
-          apellido_materno: "",
-          genero: true,
-          telefono: "",
-          email: "",
-        });
-
-        // Mostrar SweetAlert con la contraseña
-        Swal.fire({
-          title: "Ingeniero creado exitosamente",
-          html: `
-            <p><b>Contraseña generada:</b></p>
-            <input id="generatedPassword" type="text" value="${generatedPassword}" readonly 
-              style="width: 100%; text-align: center; padding: 5px; margin-top: 5px; 
-              border: 1px solid #ccc; border-radius: 4px;" />
-            <button id="copyBtn" 
-              style="margin-top:10px; padding:6px 12px; background:#3085d6; color:#fff; border:none; border-radius:4px; cursor:pointer;">
-              Copiar contraseña
-            </button>
-          `,
-          icon: "success",
-          confirmButtonText: "Ir a la tabla",
-          didOpen: () => {
-            // Programar botón de copiar
-            const copyBtn = document.getElementById("copyBtn");
-            const input = document.getElementById("generatedPassword");
-
-            if (copyBtn && input) {
-              copyBtn.addEventListener("click", () => {
-                navigator.clipboard.writeText(input.value);
-                Swal.showValidationMessage("✅ Contraseña copiada al portapapeles");
-                setTimeout(() => Swal.resetValidationMessage(), 2000);
-              });
-            }
-          },
-        }).then((resultAlert) => {
-          if (resultAlert.isConfirmed) {
-            navigate("/registro_ingenieros");
-          }
-        });
-      } else {
-        setErrorMsg(result.message || "Error al crear el ingeniero");
+      let result;
+      try {
+        result = await response.json(); // intentar parsear JSON
+      } catch {
+        throw new Error("Respuesta no válida del servidor");
       }
-    } catch (error) {
-      console.error("Error al crear ingeniero:", error);
-      setErrorMsg("Error de conexión con el servidor");
+
+      if (!response.ok || result.has_error) {
+        throw new Error(result?.message || "Error al registrar administrador");
+      }
+
+      const generatedPassword = result.data.generated_password;
+
+      // Limpiar formulario
+      setFormValues({
+        nombres: "",
+        apellido_paterno: "",
+        apellido_materno: "",
+        genero: "",
+        telefono: "",
+        email: "",
+      });
+
+      // Mostrar SweetAlert con la contraseña generada
+      Swal.fire({
+        title: "Administrador creado exitosamente",
+        html: `
+          <p><b>Contraseña generada:</b></p>
+          <input id="generatedPassword" type="text" value="${generatedPassword}" readonly 
+            style="width: 100%; text-align: center; padding: 5px; margin-top: 5px; 
+            border: 1px solid #ccc; border-radius: 4px;" />
+          <button id="copyBtn" 
+            style="margin-top:10px; padding:6px 12px; background:#3085d6; color:#fff; border:none; border-radius:4px; cursor:pointer;">
+            Copiar contraseña
+          </button>
+        `,
+        icon: "success",
+        confirmButtonText: "Ir a la tabla",
+        didOpen: () => {
+          const copyBtn = document.getElementById("copyBtn");
+          const input = document.getElementById("generatedPassword");
+          if (copyBtn && input) {
+            copyBtn.addEventListener("click", () => {
+              navigator.clipboard.writeText(input.value);
+              Swal.showValidationMessage("✅ Contraseña copiada al portapapeles");
+              setTimeout(() => Swal.resetValidationMessage(), 2000);
+            });
+          }
+        },
+      }).then((resultAlert) => {
+        if (resultAlert.isConfirmed) {
+          navigate("/registro_administradores");
+        }
+      });
+    } catch (err) {
+      console.error(err);
+      setErrorMsg(err.message || "Ocurrió un error inesperado");
     } finally {
       setLoading(false);
     }
@@ -109,7 +120,7 @@ const Add_Users = () => {
     <div className="right-content">
       <div className="card">
         <Typography variant="h5" gutterBottom className="p-3 text-center">
-          Agregar nuevo ingeniero
+          Agregar Administrador
         </Typography>
 
         {errorMsg && (
@@ -124,8 +135,6 @@ const Add_Users = () => {
           autoComplete="off"
           onSubmit={handleSubmit}
           sx={{
-            maxWidth: 900,
-            margin: "0 auto",
             padding: 3,
             display: "flex",
             flexDirection: "column",
@@ -134,30 +143,24 @@ const Add_Users = () => {
             "& .MuiOutlinedInput-root": {
               "& fieldset": { borderColor: "var(--color-primary)" },
               "&:hover fieldset": { borderColor: "var(--color-primary)" },
-              "&.Mui-focused fieldset": {
-                borderColor: "var(--color-secondary)",
-              },
+              "&.Mui-focused fieldset": { borderColor: "var(--color-secondary)" },
             },
-            "& .MuiInputLabel-root.Mui-focused": {
-              color: "var(--color-secondary)",
-            },
+            "& .MuiInputLabel-root.Mui-focused": { color: "var(--color-secondary)" },
           }}
         >
           <Grid container spacing={3}>
-            <Grid item xs={12} sm={6}>
+            <Grid item xs={12} sm={4}>
               <TextField
                 required
-                type="text"
                 label="Nombres"
                 name="nombres"
                 value={formValues.nombres}
                 onChange={handleChange}
               />
             </Grid>
-            <Grid item xs={12} sm={6}>
+            <Grid item xs={12} sm={4}>
               <TextField
                 required
-                type="text"
                 label="Apellido Paterno"
                 name="apellido_paterno"
                 value={formValues.apellido_paterno}
@@ -167,10 +170,33 @@ const Add_Users = () => {
             <Grid item xs={12} sm={4}>
               <TextField
                 required
-                type="text"
                 label="Apellido Materno"
                 name="apellido_materno"
                 value={formValues.apellido_materno}
+                onChange={handleChange}
+              />
+            </Grid>
+            <Grid item xs={12} sm={4}>
+              <TextField
+                required
+                select
+                SelectProps={{ native: true }}
+                label="Género"
+                name="genero"
+                value={formValues.genero}
+                onChange={handleChange}
+              >
+                <option value="">Seleccione</option>
+                <option value="true">Masculino</option>
+                <option value="false">Femenino</option>
+              </TextField>
+            </Grid>
+            <Grid item xs={12} sm={4}>
+              <TextField
+                required
+                label="Teléfono"
+                name="telefono"
+                value={formValues.telefono}
                 onChange={handleChange}
               />
             </Grid>
@@ -181,16 +207,6 @@ const Add_Users = () => {
                 label="Correo electrónico"
                 name="email"
                 value={formValues.email}
-                onChange={handleChange}
-              />
-            </Grid>
-            <Grid item xs={12} sm={4}>
-              <TextField
-                required
-                type="text"
-                label="Número de teléfono"
-                name="telefono"
-                value={formValues.telefono}
                 onChange={handleChange}
               />
             </Grid>
@@ -220,4 +236,4 @@ const Add_Users = () => {
   );
 };
 
-export default Add_Users;
+export default Agregar_Admin;

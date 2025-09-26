@@ -10,43 +10,40 @@ import {
   MenuItem,
   Select,
   InputLabel,
-  FormControl,
-  CircularProgress
+  FormControl
 } from "@mui/material";
 
-const Add_Area = () => {
+const Calificaciones_Agregar = () => {
   const navigate = useNavigate();
   const [formValues, setFormValues] = useState({
-    departamento_id: "",
-    nombre: "",
-    nombre_encargado: ""
+    ing_id: "",
+    puntuacion: "",
+    comentario: ""
+    // quitamos fecha_creacion
   });
 
-  const [departamentos, setDepartamentos] = useState([]);
+  const [ingenieros, setIngenieros] = useState([]);
   const [loading, setLoading] = useState(false);
   const [successMsg, setSuccessMsg] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
 
-  // Traer departamentos
+  // Traer lista de ingenieros
   useEffect(() => {
-    const fetchDepartamentos = async () => {
+    const fetchIngenieros = async () => {
       try {
         const token = localStorage.getItem("token");
-        const res = await fetch(
-          "https://biomedcontrol-api.onrender.com/api/departamentos",
-          {
-            headers: { Authorization: `Bearer ${token}` }
-          }
-        );
-        if (!res.ok) throw new Error("Error al obtener departamentos");
+        const res = await fetch("https://biomedcontrol-api.onrender.com/api/ingenieros", {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (!res.ok) throw new Error("Error al obtener ingenieros");
         const data = await res.json();
-        setDepartamentos(data.data || []); // <-- aseguramos que sea array
+        setIngenieros(data.data || []);
       } catch (err) {
         console.error(err);
-        setDepartamentos([]);
+        setIngenieros([]);
       }
     };
-    fetchDepartamentos();
+    fetchIngenieros();
   }, []);
 
   const handleChange = (e) => {
@@ -68,29 +65,32 @@ const Add_Area = () => {
         return;
       }
 
-      const response = await fetch(
-        "https://biomedcontrol-api.onrender.com/api/areas",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`
-          },
-          body: JSON.stringify(formValues)
-        }
-      );
+      // Agregar fecha actual automática (ISO string)
+      const payload = {
+        ...formValues,
+        fecha_creacion: new Date().toISOString().split("T")[0] // YYYY-MM-DD
+      };
+
+      const response = await fetch("https://biomedcontrol-api.onrender.com/api/calificaciones", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify(payload)
+      });
 
       const result = await response.json();
 
       if (response.ok && !result.has_error) {
-        setSuccessMsg("Área creada exitosamente");
-        setFormValues({ departamento_id: "", nombre: "", nombre_encargado: "" });
-        setTimeout(() => navigate("/areas"), 2000);
+        setSuccessMsg("Calificación registrada exitosamente");
+        setFormValues({ ing_id: "", puntuacion: "", comentario: "" });
+        setTimeout(() => navigate("/calificaciones"), 2000);
       } else {
-        setErrorMsg(result.message || "Error al crear el área");
+        setErrorMsg(result.message || "Error al registrar calificación");
       }
     } catch (error) {
-      console.error("Error al crear área:", error);
+      console.error("Error al registrar calificación:", error);
       setErrorMsg("Error de conexión con el servidor");
     } finally {
       setLoading(false);
@@ -101,7 +101,7 @@ const Add_Area = () => {
     <div className="right-content">
       <div className="card">
         <Typography variant="h5" gutterBottom className="p-3 text-center">
-          Agregar información del área
+          Agregar Calificación
         </Typography>
 
         {successMsg && <Alert severity="success">{successMsg}</Alert>}
@@ -129,47 +129,48 @@ const Add_Area = () => {
           }}
         >
           <Grid container spacing={3}>
-            <Grid item xs={12} sm={4}>
+            {/* Ingeniero */}
+            <Grid item xs={12} sm={6}>
               <FormControl fullWidth required>
-                <InputLabel id="departamento-label"></InputLabel>
+                <InputLabel id="ingeniero-label">Ingeniero</InputLabel>
                 <Select
-                  labelId="departamento-label"
-                  name="departamento_id"
-                  value={formValues.departamento_id}
+                  labelId="ingeniero-label"
+                  name="ing_id"
+                  value={formValues.ing_id}
                   onChange={handleChange}
-                  displayEmpty
                 >
-                  <MenuItem value="">
-                    <em>Seleccione un departamento</em>
-                  </MenuItem>
-                  {departamentos.map((dep) => (
-                    <MenuItem key={dep.id} value={dep.id}>
-                      {dep.nombre}
+                  {ingenieros.map((ing) => (
+                    <MenuItem key={ing.id} value={ing.id}>
+                      {ing.nombres} {ing.apellido_paterno} {ing.apellido_materno}
                     </MenuItem>
                   ))}
                 </Select>
               </FormControl>
             </Grid>
 
-            <Grid item xs={12} sm={4}>
+            {/* Puntuación */}
+            <Grid item xs={12} sm={6}>
               <TextField
                 required
-                type="text"
-                label="Nombre del área"
-                name="nombre"
-                value={formValues.nombre}
+                type="number"
+                step="0.1"
+                label="Puntuación"
+                name="puntuacion"
+                value={formValues.puntuacion}
                 onChange={handleChange}
               />
             </Grid>
 
-            <Grid item xs={12} sm={4}>
+            {/* Comentario */}
+            <Grid item xs={12}>
               <TextField
                 required
                 type="text"
-                label="Nombre del encargado del área"
-                name="nombre_encargado"
-                value={formValues.nombre_encargado}
+                label="Comentario"
+                name="comentario"
+                value={formValues.comentario}
                 onChange={handleChange}
+                fullWidth
               />
             </Grid>
           </Grid>
@@ -185,11 +186,7 @@ const Add_Area = () => {
                 "&:hover": { backgroundColor: "var(--color-primary)" }
               }}
             >
-              {loading ? (
-                <CircularProgress size={24} color="inherit" />
-              ) : (
-                "GUARDAR DATOS"
-              )}
+              {loading ? "Guardando..." : "GUARDAR CALIFICACIÓN"}
             </Button>
           </Box>
         </Box>
@@ -198,4 +195,4 @@ const Add_Area = () => {
   );
 };
 
-export default Add_Area;
+export default Calificaciones_Agregar;

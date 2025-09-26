@@ -5,16 +5,37 @@ const AuthContext = createContext();
 export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(localStorage.getItem("user") || null);
+  const [user, setUser] = useState(
+    JSON.parse(localStorage.getItem("user")) || null
+  );
 
   const login = (userData) => {
     setUser(userData);
-    localStorage.setItem("user", userData);
+    localStorage.setItem("user", JSON.stringify(userData));
+    localStorage.setItem("token", userData.token); // guarda token también
   };
 
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem("user");
+  const logout = async () => {
+    const token = localStorage.getItem("token");
+
+    try {
+      if (token) {
+        await fetch("https://biomedcontrol-api.onrender.com/api/logout/", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
+      }
+    } catch (error) {
+      console.error("Error al cerrar sesión en el servidor:", error);
+    } finally {
+      // Limpieza local siempre
+      setUser(null);
+      localStorage.removeItem("user");
+      localStorage.removeItem("token");
+    }
   };
 
   return (

@@ -1,9 +1,10 @@
 import React, { useState } from "react";
 import { ExpandMore, ExpandLess, Dashboard, Settings, Info, 
   BarChart, TableView, Engineering, Apartment, AssuredWorkload, 
-  Handyman, Assignment, Devices, PendingActions, Checklist, VerifiedUser, ManageHistory } from "@mui/icons-material";
+  Handyman, Assignment, Devices, PendingActions, Checklist, VerifiedUser, ManageHistory, Verified } from "@mui/icons-material";
 import { List, ListItem, ListItemText, ListItemIcon, Collapse, Divider } from "@mui/material";
 import { Link } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 import "../assets/styles/sidebar.css";
 
 const menuItems = [
@@ -11,66 +12,78 @@ const menuItems = [
     text: "Registros",
     icon: <TableView style={{color:"var(--color-primary)"}} />, 
     subMenu: [
-      { text: "Mantenimientos", icon: <Handyman style={{color:"var(--color-secondary)"}} />, path:"/registros_mantenimientos" },
-      { text: "Gestión de equipos", icon: <Devices style={{color:"var(--color-secondary)"}} />, path:"/registros_equipos" },
-      { text: "Departamentos", icon: <Apartment style={{color:"var(--color-secondary)"}} />,  path:"/departamentos" },
-      { text: "Áreas", icon: <AssuredWorkload style={{color:"var(--color-secondary)"}} />,  path:"/areas" },
-      { text: "Ingenieros", icon: <Engineering style={{color:"var(--color-secondary)"}} />,  path:"/registro_ingenieros" },
-      { text: "Administradores", icon: <VerifiedUser style={{color:"var(--color-secondary)"}} />,  path:"/registro_administradores" },
+      { text: "Mantenimientos", icon: <Handyman style={{color:"var(--color-secondary)"}} />, path:"/registros_mantenimientos", roles:["administrador","ingeniero"] },
+      { text: "Gestión de equipos", icon: <Devices style={{color:"var(--color-secondary)"}} />, path:"/registros_equipos", roles:["administrador"] },
+      { text: "Departamentos", icon: <Apartment style={{color:"var(--color-secondary)"}} />,  path:"/departamentos", roles:["administrador"] },
+      { text: "Áreas", icon: <AssuredWorkload style={{color:"var(--color-secondary)"}} />,  path:"/areas", roles:["administrador"] },
+      { text: "Ingenieros", icon: <Engineering style={{color:"var(--color-secondary)"}} />,  path:"/registro_ingenieros", roles:["administrador"] },
+      { text: "Administradores", icon: <VerifiedUser style={{color:"var(--color-secondary)"}} />,  path:"/registro_administradores", roles:["administrador"] },
     ],
   },
   {
     text: "Pendientes",
     icon: <PendingActions style={{color:"var(--color-primary)"}} />, 
     path: "/altas_pendientes",
+    roles:["administrador","ingeniero"]
   },
-    {
+  {
     text: "Atrasos",
     icon: <ManageHistory style={{color:"var(--color-primary)"}} />, 
     path: "/mantenimientos_atrasados",
+    roles:["administrador","ingeniero"]
+  },
+    {
+    text: "Calificaciones",
+    icon: <Verified style={{color:"var(--color-primary)"}} />, 
+    path: "/calificaciones",
+    roles:["administrador","ingeniero"]
   },
   {
     text: "Seguimientos",
     icon: <Checklist style={{color:"var(--color-primary)"}} />, 
     path: "/seguimientos",
+    roles:["administrador","ingeniero"]
   },
   {
     text: "Reportes",
     icon: <BarChart style={{color:"var(--color-primary)"}} />, 
     path: "#",
+    roles:["administrador"]
   },
   {
     text: "Desempeños",
     icon: <Assignment style={{color:"var(--color-primary)"}} />, 
     path: "/desempeños",
+    roles:["administrador"]
   },
-  //{
-    //text: "Menú",
-    //icon: <Dashboard style={{color:"var(--color-primary)"}} />, 
-    //subMenu: [
-      //{ text: "Submenú", icon: <Info style={{color:"var(--color-secondary)"}} /> },
-      //{ text: "Submenú", icon: <Settings style={{color:"var(--color-secondary)"}} /> },
-    //],
-  //},
 ];
 
 const Sidebar = () => {
   const [openMenu, setOpenMenu] = useState({});
+  const { user } = useAuth();
+  const role = user?.role;
 
   const handleToggle = (index) => {
     setOpenMenu((prev) => ({ ...prev, [index]: !prev[index] }));
   };
 
   return (
-    <div className="">
     <div className="sidebar">
       <div className="tittle_seccion">
         <h5>Gestión de mantenimientos</h5>
       </div>
       <List>
-        {menuItems.map((item, index) => (
+        {menuItems
+          .filter(item => !item.roles || item.roles.includes(role)) // filtro por rol
+          .map((item, index) => (
           <div key={index}>
-            <ListItem button component={Link} to={item.path || "#"} onClick={() => handleToggle(index)} className="menu-item">
+            <ListItem 
+              button 
+              component={Link} 
+              to={item.path || "#"} 
+              onClick={() => handleToggle(index)} 
+              className="menu-item"
+            >
               <ListItemIcon>{item.icon}</ListItemIcon>
               <ListItemText primary={item.text} />
               {item.subMenu ? (openMenu[index] ? <ExpandLess /> : <ExpandMore />) : null}
@@ -78,11 +91,19 @@ const Sidebar = () => {
             {item.subMenu && (
               <Collapse in={openMenu[index]} timeout="auto" unmountOnExit>
                 <List component="div" disablePadding className="submenu-container">
-                  {item.subMenu.map((sub, subIndex) => (
-                    <ListItem button component={Link} to={sub.path || "#"} key={subIndex} className="submenu-item">
-                      <ListItemIcon>{sub.icon}</ListItemIcon>
-                      <ListItemText primary={sub.text} />
-                    </ListItem>
+                  {item.subMenu
+                    .filter(sub => !sub.roles || sub.roles.includes(role)) // filtro por rol
+                    .map((sub, subIndex) => (
+                      <ListItem 
+                        button 
+                        component={Link} 
+                        to={sub.path || "#"} 
+                        key={subIndex} 
+                        className="submenu-item"
+                      >
+                        <ListItemIcon>{sub.icon}</ListItemIcon>
+                        <ListItemText primary={sub.text} />
+                      </ListItem>
                   ))}
                 </List>
               </Collapse>
@@ -90,7 +111,6 @@ const Sidebar = () => {
           </div>
         ))}
       </List>
-    </div>
     </div>
   );
 };

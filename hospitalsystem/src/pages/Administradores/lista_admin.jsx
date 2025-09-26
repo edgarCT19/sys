@@ -6,6 +6,7 @@ import {
   Tooltip,
   Stack,
   Typography,
+  Alert,
   CircularProgress,
 } from "@mui/material";
 import {
@@ -17,26 +18,33 @@ import Swal from "sweetalert2";
 import Search from "../../components/Search";
 import Paginacion from "../../components/Pagination";
 
-const Ingenieros = () => {
-  const [ingenieros, setIngenieros] = useState([]);
+const Lista_administradores = () => {
+  const [admins, setAdmins] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [deletingId, setDeletingId] = useState(null);
+  const [errorMsg, setErrorMsg] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
+  const [deletingId, setDeletingId] = useState(null);
+
   const itemsPerPage = 5;
 
   useEffect(() => {
-    fetchIngenieros();
+    fetchAdministradores();
   }, []);
 
-  const fetchIngenieros = async () => {
+  const fetchAdministradores = async () => {
     setLoading(true);
+    setErrorMsg("");
     try {
       const token = localStorage.getItem("token");
-      if (!token) throw new Error("Usuario no autenticado");
+      if (!token) {
+        setErrorMsg("Usuario no autenticado");
+        setLoading(false);
+        return;
+      }
 
       const response = await fetch(
-        "https://biomedcontrol-api.onrender.com/api/ingenieros",
+        "https://biomedcontrol-api.onrender.com/api/administradores",
         {
           headers: {
             "Content-Type": "application/json",
@@ -45,86 +53,115 @@ const Ingenieros = () => {
         }
       );
 
-      if (!response.ok) throw new Error("Error al obtener ingenieros");
+      if (!response.ok) {
+        const text = await response.text();
+        console.error("Error GET administradores:", text);
+        throw new Error("Error al obtener administradores");
+      }
 
       const result = await response.json();
-      if (!result.has_error) setIngenieros((result.data || []).slice().reverse());
-    } catch (error) {
-      console.error("Error en fetchIngenieros:", error);
+      if (!result.has_error) {
+        setAdmins((result.data || []).slice().reverse());;
+      } else {
+        setErrorMsg(result.message || "Error al obtener administradores");
+      }
+    } catch (err) {
+      console.error("fetchAdministradores:", err);
+      setErrorMsg(err.message || "Error de conexión con el servidor");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDelete = async (id) => {
-    const confirm = await Swal.fire({
+  const handleDelete = (id) => {
+    Swal.fire({
       title: "¿Estás seguro?",
-      text: "No podrás revertir esta acción",
+      text: "Esta acción eliminará al administrador y no se puede deshacer.",
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#d33",
       cancelButtonColor: "#3085d6",
       confirmButtonText: "Sí, eliminar",
       cancelButtonText: "Cancelar",
-    });
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        setDeletingId(id);
+        try {
+          const token = localStorage.getItem("token");
+          if (!token) throw new Error("Usuario no autenticado");
 
-    if (!confirm.isConfirmed) return;
+          const response = await fetch(
+            `https://biomedcontrol-api.onrender.com/api/administradores/${id}`,
+            {
+              method: "DELETE",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
 
-    setDeletingId(id);
-    try {
-      const token = localStorage.getItem("token");
-      const response = await fetch(
-        `https://biomedcontrol-api.onrender.com/api/ingenieros/${id}`,
-        {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          if (!response.ok) {
+            const text = await response.text();
+            console.error("Error DELETE administradores:", text);
+            throw new Error("Error al eliminar administrador");
+          }
+
+          // Si el backend responde JSON con mensaje, lo mostramos; si no, usamos mensaje por defecto
+          let resultJson = null;
+          try {
+            resultJson = await response.json();
+          } catch (err) {
+            /* no JSON en respuesta, lo ignoramos */
+          }
+
+          const successMessage =
+            (resultJson && !resultJson.has_error && resultJson.message) ||
+            "Administrador eliminado correctamente";
+
+          Swal.fire("Eliminado", successMessage, "success");
+          setAdmins((prev) => prev.filter((a) => a.id !== id));
+        } catch (err) {
+          console.error("handleDelete:", err);
+          Swal.fire(
+            "Error",
+            err.message || "No se pudo eliminar el administrador",
+            "error"
+          );
+        } finally {
+          setDeletingId(null);
         }
-      );
-
-      const text = await response.text();
-      let result;
-      try {
-        result = JSON.parse(text);
-      } catch {
-        Swal.fire("Error", "El servidor no respondió correctamente", "error");
-        return;
       }
-
-      if (response.ok && !result.has_error) {
-        Swal.fire("Eliminado", result.message, "success");
-        setIngenieros((prev) => prev.filter((item) => item.id !== id));
-      } else {
-        Swal.fire("Error", result.message || "No se pudo eliminar", "error");
-      }
-    } catch (error) {
-      console.error("Error al eliminar:", error);
-      Swal.fire("Error", "Error de conexión con el servidor", "error");
-    } finally {
-      setDeletingId(null);
-    }
+    });
   };
 
-  const handleSearch = (searchText) => setSearchTerm(searchText);
-  const handlePageChange = (event, value) => setCurrentPage(value);
+  const handleSearch = (text) => {
+    setSearchTerm(text);
+    setCurrentPage(1);
+  };
 
-  // FILTRAR Y PAGINAR
-  const filteredData = ingenieros.filter((item) =>
-    Object.values(item).some((value) =>
-      value?.toString().toLowerCase().includes(searchTerm.toLowerCase())
+  const handlePageChange = (event, value) => {
+    setCurrentPage(value);
+  };
+
+  // Filtrado (busca en todos los campos del objeto)
+  const filtered = admins.filter((item) =>
+    Object.values(item).some((val) =>
+      String(val).toLowerCase().includes(searchTerm.toLowerCase())
     )
   );
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = filteredData.slice(indexOfFirstItem, indexOfLastItem);
+
+  // Paginación
+  const indexOfLast = currentPage * itemsPerPage;
+  const indexOfFirst = indexOfLast - itemsPerPage;
+  const currentItems = filtered.slice(indexOfFirst, indexOfLast);
 
   return (
     <div className="right-content">
       <div className="card mt-2">
         <div className="table-header d-flex justify-content-end align-items-center mt-2 mb-3 p-2">
           <Search onSearch={handleSearch} />
-          <Link to="/agregar_ingeniero">
+          <Link to="/agregar_administrador">
             <Button
               variant="contained"
               className="mx-2"
@@ -136,24 +173,31 @@ const Ingenieros = () => {
           </Link>
         </div>
 
+        {errorMsg && (
+          <div style={{ padding: "0 16px 8px 16px" }}>
+            <Alert severity="error">{errorMsg}</Alert>
+          </div>
+        )}
+
         <div className="d-flex justify-content-center align-items-center">
           <div className="table-container">
             {loading ? (
               <div style={{ padding: 30, textAlign: "center" }}>
                 <CircularProgress />
-                <Typography mt={1}>Cargando ingenieros...</Typography>
+                <Typography mt={1}>Cargando administradores...</Typography>
               </div>
             ) : (
               <table className="styled-table text-center">
                 <thead>
                   <tr className="text-center">
                     <th>ID</th>
-                    <th>Nombre</th>
+                    <th>Nombres</th>
                     <th>Apellido Paterno</th>
                     <th>Apellido Materno</th>
                     <th>Email</th>
                     <th>Teléfono</th>
                     <th>Género</th>
+                    <th>Fecha de Alta</th>
                     <th>Acciones</th>
                   </tr>
                 </thead>
@@ -169,8 +213,14 @@ const Ingenieros = () => {
                         <td>{item.telefono}</td>
                         <td>{item.genero ? "Masculino" : "Femenino"}</td>
                         <td>
+                          {new Date(item.created_at).toLocaleString("es-MX", {
+                            dateStyle: "short",
+                            timeStyle: "short",
+                          })}
+                        </td>
+                        <td>
                           <Stack direction="row" spacing={1} justifyContent="center">
-                            <Link to={`/editar_ingeniero/${item.id}`}>
+                            <Link to={`/editar_administrador/${item.id}`}>
                               <Tooltip title="Editar">
                                 <IconButton size="small" color="primary">
                                   <EditIcon fontSize="small" />
@@ -179,6 +229,7 @@ const Ingenieros = () => {
                             </Link>
                             <Tooltip title="Eliminar">
                               <span>
+                                {/* envolvemos en span para poder desactivar el tooltip cuando el botón esté deshabilitado */}
                                 <IconButton
                                   size="small"
                                   color="error"
@@ -199,7 +250,7 @@ const Ingenieros = () => {
                     ))
                   ) : (
                     <tr>
-                      <td colSpan="8">No se encontraron resultados.</td>
+                      <td colSpan="9">No se encontraron resultados.</td>
                     </tr>
                   )}
                 </tbody>
@@ -209,7 +260,7 @@ const Ingenieros = () => {
         </div>
 
         <Paginacion
-          totalItems={filteredData.length}
+          totalItems={filtered.length}
           itemsPerPage={itemsPerPage}
           currentPage={currentPage}
           handlePageChange={handlePageChange}
@@ -219,4 +270,4 @@ const Ingenieros = () => {
   );
 };
 
-export default Ingenieros;
+export default Lista_administradores;

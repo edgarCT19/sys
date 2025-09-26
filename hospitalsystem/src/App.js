@@ -36,7 +36,12 @@ import Atrasados from "./pages/Atrasos/atrasados";
 import Add_Area from "./pages/Areas/add_form";
 import Edit_Area from "./pages/Areas/edit_form";
 import Edit_User from "./pages/Usuarios/edit_form";
-
+import Lista_Administradores from "./pages/Administradores/lista_admin";
+import Agregar_Admin from "./pages/Administradores/add_form";
+import Editar_Admin from "./pages/Administradores/edit_form";
+import Calificaciones from "./pages/Desempeños/calificaciones";
+import Calificaciones_Agregar from "./pages/Desempeños/form_add";
+import Calificaciones_Editar from "./pages/Desempeños/form_edit";
 
 function AppContent() {
 
@@ -71,15 +76,19 @@ function AppContent() {
             {/* URL's de registros de equipos  */}
             <Route path="/registros_equipos" element={<Dashboard></Dashboard>} />
             <Route path="/agregar_registro" element={<Add_Dashboard></Add_Dashboard>} />
-            <Route path="/editar_registro" element={<Edit_Dashboard></Edit_Dashboard>} />
-            {/* URL's de registros de usuarios */}
+            <Route path="/editar_dispositivo/:id" element={<Edit_Dashboard></Edit_Dashboard>} />
+            {/* URL's de registros de usuarios ADMINISTRADORES*/}
+            <Route path="/registro_administradores" element={<Lista_Administradores></Lista_Administradores>} />
+            <Route path="/agregar_administrador" element={<Agregar_Admin></Agregar_Admin>} />
+            <Route path="/editar_administrador/:id" element={<Editar_Admin></Editar_Admin>} />
+            {/* URL's de registros de usuarios INGENIEROS */}
             <Route path="/registro_ingenieros" element={<Usuarios></Usuarios>} />
             <Route path="/agregar_ingeniero" element={<Add_Users></Add_Users>} />
-            <Route path="/editar_ingeniero" element={<Edit_User></Edit_User>} />
+            <Route path="/editar_ingeniero/:id" element={<Edit_User></Edit_User>} />
             {/* URL's de mantenimientos */}
             <Route path="/registros_mantenimientos" element={<Mantenimientos></Mantenimientos>} />
             <Route path="/agregar_registro_mantenimiento" element={<Add_Mantenimiento></Add_Mantenimiento>} />
-            <Route path="/editar_registro_mantenimiento" element={<Edit_Mantenimiento></Edit_Mantenimiento>} />
+            <Route path="/editar_registro_mantenimiento/:id" element={<Edit_Mantenimiento></Edit_Mantenimiento>} />
             <Route path="/seguimientos" element={<Seguimientos></Seguimientos>} />
             {/* URL's de los reportes y gráficos */}
             <Route path="/reportes" element={<Reportes></Reportes>} />
@@ -89,17 +98,21 @@ function AppContent() {
             {/* URL's de áreas */}
             <Route path="/areas" element={<Areas></Areas>} />
             <Route path="/agregar_area" element={<Add_Area></Add_Area>} />
-            <Route path="/editar_area" element={<Edit_Area></Edit_Area>} />
+            <Route path="/editar_area/:id" element={<Edit_Area></Edit_Area>} />
             {/*  URL's de departamentos */}
             <Route path="/departamentos" element={<Departamento></Departamento>} />
             <Route path="/agregar_departamento" element={<Add_Departamento></Add_Departamento>} />
-            <Route path="/editar_departamento" element={<Edit_Departamento></Edit_Departamento>} />
+            <Route path="/editar_departamento/:id" element={<Edit_Departamento></Edit_Departamento>} />
             {/*  URL's de mantenimientos pendientes */}
             <Route path="/altas_pendientes" element={<Altas_Pendientes></Altas_Pendientes>} />
             {/*  URL's de atrasos */}
             <Route path="/agregar_atraso" element={<Add_Atraso></Add_Atraso>} />
-            <Route path="/editar_atraso" element={<Edit_Atraso></Edit_Atraso>} />
+            <Route path="/editar_atraso/:id" element={<Edit_Atraso></Edit_Atraso>} />
             <Route path="/mantenimientos_atrasados" element={<Atrasados></Atrasados>} />
+            {/*  URL's de calificaciones */}
+            <Route path="/calificaciones" element={<Calificaciones></Calificaciones>} />
+            <Route path="/agregar_calificacion" element={<Calificaciones_Agregar></Calificaciones_Agregar>} />
+            <Route path="/editar_calificacion/:id" element={<Calificaciones_Editar></Calificaciones_Editar>} />
             {/* Otros */}
             <Route path="/desempeños" element={<Desempeno></Desempeno>} />
           </Routes>

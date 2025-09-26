@@ -14,10 +14,13 @@ import logo from "../assets/img/logo.png";
 import Alert  from "@mui/material/Alert";
 import { FaHospital } from "react-icons/fa"
 import  Tooltip  from "@mui/material/Tooltip";
+import { useAuth } from "../context/AuthContext";
 
 const Header = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
+  const { user } = useAuth();
+  const { logout } = useAuth();
 
   const handleOpenMyAccDr = (event) => {
     setAnchorEl(event.currentTarget);
@@ -68,8 +71,8 @@ const Header = () => {
               </div>
 
               <div className="userInfo">
-                <h4>Juan Perez Perez</h4>
-                <p className="mb-0">juanperez001@gmail.com</p>
+                <h4>{user?.user?.nombres || "Invitado"}</h4>
+                <p className="mb-0">{user?.user?.email || ""}</p>
               </div>
             </Button>
 
@@ -117,7 +120,7 @@ const Header = () => {
               </MenuItem>
               <Divider />
               <MenuItem
-                onClick={handleCloseMyAccDr}
+                onClick={logout}
                 className="text-danger"
                 component={Link} to="/login"
               >

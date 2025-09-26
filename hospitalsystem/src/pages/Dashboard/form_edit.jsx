@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Button,
   TextField,
@@ -9,143 +9,172 @@ import {
   Grid,
   Typography,
   Box,
-  Divider
+  Divider,
+  Alert,
+  CircularProgress
 } from "@mui/material";
+import { useParams, useNavigate } from "react-router-dom";
 
 const Edit_Dashboard = () => {
-  // Valores predeterminados para la simulación de edición
-  const [formData, setFormData] = useState({
-    descripcionEquipo: "Luminaria LED",
-    departamento: "A",
-    area: "oficina",
-    fabricante: "001",
-    modelo: "LED-1234",
-    numeroSerie: "ABC12345",
-    ingeniero: "Juan Pérez"
-  });
+  const { id } = useParams();
+  const navigate = useNavigate();
 
-  // Función para actualizar el estado del formulario
+  const [areas, setAreas] = useState([]);
+  const [formData, setFormData] = useState({
+    area_id: "",
+    equipo: "",
+    fabricante: "",
+    modelo: "",
+    no_serial: ""
+  });
+  const [originalValues, setOriginalValues] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [successMsg, setSuccessMsg] = useState("");
+  const [errorMsg, setErrorMsg] = useState("");
+
+  // 🔹 Traer áreas
+  useEffect(() => {
+    const fetchAreas = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const res = await fetch("https://biomedcontrol-api.onrender.com/api/areas", {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const data = await res.json();
+        if (!data.has_error) setAreas(data.data || []);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    fetchAreas();
+  }, []);
+
+  // 🔹 Traer dispositivo por id
+  useEffect(() => {
+    const fetchDevice = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const res = await fetch(`https://biomedcontrol-api.onrender.com/api/dispositivos/${id}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (!res.ok) throw new Error("Error al obtener el dispositivo");
+        const data = await res.json();
+
+        const deviceData = {
+          area_id: data.data.area_id || "",
+          equipo: data.data.equipo || "",
+          fabricante: data.data.fabricante || "",
+          modelo: data.data.modelo || "",
+          no_serial: data.data.no_serial || ""
+        };
+        setFormData(deviceData);
+        setOriginalValues(deviceData);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDevice();
+  }, [id]);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value
-    });
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Simulación del envío del formulario
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Formulario enviado con los datos: ", formData);
+    setErrorMsg("");
+    setSuccessMsg("");
+
+    try {
+      const token = localStorage.getItem("token");
+      const body = {};
+      Object.keys(formData).forEach((key) => {
+        if (formData[key] !== originalValues[key]) body[key] = formData[key];
+      });
+
+      if (Object.keys(body).length === 0) {
+        setErrorMsg("No hay cambios para actualizar");
+        return;
+      }
+
+      const res = await fetch(`https://biomedcontrol-api.onrender.com/api/dispositivos/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify(body)
+      });
+
+      if (!res.ok) throw new Error("Error al actualizar dispositivo");
+
+      setSuccessMsg("Dispositivo actualizado correctamente");
+
+      // redirigir después de 2 segundos
+      setTimeout(() => navigate("/registros_equipos"), 2000);
+    } catch (err) {
+      console.error(err);
+      setErrorMsg("Error al actualizar el dispositivo");
+    }
   };
+
+  if (loading) return <p>Cargando...</p>;
 
   return (
     <div className="right-content">
-      <div className="card">
-        <Typography variant="h5" gutterBottom className="p-3 text-center">
-          Editar información de mantenimiento.
+      <div className="card p-4">
+        <Typography variant="h5" gutterBottom className="text-center mb-3">
+          Editar información del dispositivo
         </Typography>
+
+        {successMsg && <Alert severity="success">{successMsg}</Alert>}
+        {errorMsg && <Alert severity="error">{errorMsg}</Alert>}
+
         <Box
           component="form"
           noValidate
           autoComplete="off"
           onSubmit={handleSubmit}
           sx={{
-            padding: 3,
-            display: "flex",
-            flexDirection: "column",
-            gap: 3,
             "& .MuiFormControl-root": { width: "100%" },
             "& .MuiOutlinedInput-root": {
-              "& fieldset": {
-                borderColor: "var(--color-primary)"
-              },
-              "&:hover fieldset": {
-                borderColor: "var(--color-primary)"
-              },
-              "&.Mui-focused fieldset": {
-                borderColor: "var(--color-primary)"
-              }
+              "& fieldset": { borderColor: "var(--color-primary)" },
+              "&:hover fieldset": { borderColor: "var(--color-primary)" },
+              "&.Mui-focused fieldset": { borderColor: "var(--color-secondary)" }
             },
-            "& .MuiInputLabel-root.Mui-focused": {
-              color: "var(--color-primary)"
-            }
+            "& .MuiInputLabel-root.Mui-focused": { color: "var(--color-secondary)" }
           }}
         >
           <Grid container spacing={3}>
-            {/* Agrupación de Ubicación */}
             <Grid item xs={12}>
               <TextField
                 required
-                type="text"
-                label="Descripción del equipo"
-                variant="outlined"
-                fullWidth
-                name="descripcionEquipo"
-                value={formData.descripcionEquipo}
+                label="Nombre del equipo"
+                name="equipo"
+                value={formData.equipo}
                 onChange={handleChange}
               />
             </Grid>
 
-            <Grid item xs={12}>
-              <Typography variant="h6" gutterBottom>
-                Información de Ubicación
-              </Typography>
-              <Divider sx={{ marginBottom: 2 }} />
-            </Grid>
-
-            <Grid item xs={12} sm={4}>
-              <FormControl fullWidth>
-                <InputLabel>Departamento</InputLabel>
-                <Select
-                  label="Departamento"
-                  name="departamento"
-                  value={formData.departamento}
-                  onChange={handleChange}
-                >
-                  <MenuItem value="A">Departamento A</MenuItem>
-                  <MenuItem value="B">Departamento B</MenuItem>
-                  <MenuItem value="C">Departamento C</MenuItem>
-                </Select>
-              </FormControl>
-            </Grid>
-
-            <Grid item xs={12} sm={4}>
+            <Grid item xs={12} sm={6}>
               <FormControl fullWidth>
                 <InputLabel>Área</InputLabel>
                 <Select
-                  label="Área"
-                  name="area"
-                  value={formData.area}
+                  name="area_id"
+                  value={formData.area_id}
                   onChange={handleChange}
+                  required
                 >
-                  <MenuItem value="oficina">Oficina</MenuItem>
-                  <MenuItem value="sala">Sala de Espera</MenuItem>
-                  <MenuItem value="aula">Aula</MenuItem>
-                </Select>
-              </FormControl>
-            </Grid>
-
-            {/* Agrupación de Información de la Luminaria */}
-            <Grid item xs={12}>
-              <Typography variant="h6" gutterBottom>
-                Información del equipo
-              </Typography>
-              <Divider sx={{ marginBottom: 2 }} />
-            </Grid>
-
-            <Grid item xs={12} sm={6}>
-              <FormControl fullWidth>
-                <InputLabel>Fabricante</InputLabel>
-                <Select
-                  label="Fabricante"
-                  name="fabricante"
-                  value={formData.fabricante}
-                  onChange={handleChange}
-                >
-                  <MenuItem value="001">12WERTY</MenuItem>
-                  <MenuItem value="002">HP-compaq</MenuItem>
-                  <MenuItem value="003">LG-8972g</MenuItem>
+                  {areas.map((area) => (
+                    <MenuItem key={area.id} value={area.id}>
+                      {area.nombre}
+                    </MenuItem>
+                  ))}
                 </Select>
               </FormControl>
             </Grid>
@@ -153,10 +182,17 @@ const Edit_Dashboard = () => {
             <Grid item xs={12} sm={6}>
               <TextField
                 required
-                type="text"
+                label="Fabricante"
+                name="fabricante"
+                value={formData.fabricante}
+                onChange={handleChange}
+              />
+            </Grid>
+
+            <Grid item xs={12} sm={6}>
+              <TextField
+                required
                 label="Modelo"
-                variant="outlined"
-                fullWidth
                 name="modelo"
                 value={formData.modelo}
                 onChange={handleChange}
@@ -166,50 +202,30 @@ const Edit_Dashboard = () => {
             <Grid item xs={12} sm={6}>
               <TextField
                 required
-                type="text"
                 label="Número de serie"
-                variant="outlined"
-                fullWidth
-                name="numeroSerie"
-                value={formData.numeroSerie}
-                onChange={handleChange}
-              />
-            </Grid>
-
-            {/* Agrupación de Especificaciones Técnicas */}
-            <Grid item xs={12}>
-              <Typography variant="h6" gutterBottom>
-                Especificaciones extras
-              </Typography>
-              <Divider sx={{ marginBottom: 2 }} />
-            </Grid>
-
-            <Grid item xs={12} sm={4}>
-              <TextField
-                required
-                type="text"
-                label="Nombre del ingeniero"
-                variant="outlined"
-                fullWidth
-                name="ingeniero"
-                value={formData.ingeniero}
+                name="no_serial"
+                value={formData.no_serial}
                 onChange={handleChange}
               />
             </Grid>
           </Grid>
 
-          {/* Botón de enviar centrado y largo */}
           <Box display="flex" justifyContent="center" mt={3}>
             <Button
               type="submit"
               variant="contained"
+              disabled={loading}
               sx={{
                 width: "50%",
                 backgroundColor: "var(--color-primary)",
                 "&:hover": { backgroundColor: "var(--color-primary)" }
               }}
             >
-              Guardar cambios
+              {loading ? (
+                <CircularProgress size={24} color="inherit" />
+              ) : (
+                "GUARDAR DATOS"
+              )}
             </Button>
           </Box>
         </Box>
