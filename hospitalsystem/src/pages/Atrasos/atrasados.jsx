@@ -17,6 +17,7 @@ import {
 import Swal from "sweetalert2";
 import Search from "../../components/Search";
 import Paginacion from "../../components/Pagination";
+import { useAuth } from "../../context/AuthContext";
 
 const Atrasados = () => {
   const [tickets, setTickets] = useState([]);
@@ -25,6 +26,7 @@ const Atrasados = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
   const itemsPerPage = 5;
+  const { user } = useAuth();
 
   useEffect(() => {
     fetchTickets();
@@ -102,9 +104,16 @@ const Atrasados = () => {
       val?.toString().toLowerCase().includes(searchTerm.toLowerCase())
     )
   );
+
+// FILTRADO SEGÚN ROL
+const roleFilteredTickets =
+  user?.role === "ingeniero"
+    ? filteredData.filter((t) => t.ing_id === user.user.id) // solo sus tickets
+    : filteredData; // administradores u otros roles ven todo
+
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = filteredData.slice(indexOfFirstItem, indexOfLastItem);
+  const currentItems = roleFilteredTickets.slice(indexOfFirstItem, indexOfLastItem);
 
   return (
     <div className="right-content">

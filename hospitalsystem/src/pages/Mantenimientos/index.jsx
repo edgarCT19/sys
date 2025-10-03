@@ -7,6 +7,7 @@ import {
   Stack,
   Typography,
   CircularProgress,
+  Alert
 } from "@mui/material";
 import {
   Delete as DeleteIcon,
@@ -31,6 +32,7 @@ const Mantenimientos = () => {
   const handlePageChange = (event, value) => setCurrentPage(value);
 
   const { user } = useAuth();
+  
 
   // Obtener mantenimientos
   const fetchMantenimientos = async () => {
@@ -116,7 +118,8 @@ const Mantenimientos = () => {
     const fechaFinMatch = item.fecha_fin
       ? new Date(item.fecha_fin).toLocaleDateString("es-MX").includes(term)
       : false;
-
+    const solucion = item.solucion?.toLowerCase().includes(term);
+    
     return (
       idMatch ||
       descripcionMatch ||
@@ -125,7 +128,8 @@ const Mantenimientos = () => {
       ingenieroMatch ||
       adminMatch ||
       fechaInicioMatch ||
-      fechaFinMatch
+      fechaFinMatch ||
+      solucion
     );
   });
 
@@ -140,6 +144,29 @@ const Mantenimientos = () => {
     if (user?.role === "ingeniero") return item.ingeniero?.id === user.user.id; // Ingeniero solo su info
     return false;
   });
+
+  const today = new Date();
+  const alertItems =
+    user?.role === "ingeniero"
+      ? displayedItems
+          .filter((item) => !item.solucion || item.solucion.trim() === "")
+          .map((item) => {
+            const fechaInicio = item.fecha_inicio ? new Date(item.fecha_inicio) : null;
+            const fechaFin = item.fecha_fin ? new Date(item.fecha_fin) : null;
+
+            if (fechaInicio && fechaFin) {
+              if (fechaInicio.toDateString() === fechaFin.toDateString()) {
+                return { type: "warning", item };
+              }
+              if (fechaFin < today) {
+                return { type: "error", item };
+              }
+            }
+
+            return null; // si no cumple condiciones, se descarta
+          })
+          .filter(Boolean) // elimina los null
+      : [];
 
   return (
     <div className="right-content">
@@ -158,6 +185,36 @@ const Mantenimientos = () => {
               </Button>
             </Link>
           )}
+        </div>
+
+        <div className="">
+            {alertItems.length > 0 && (
+              <Stack spacing={2} mb={2}>
+                {alertItems.map(({ type, item }) => (
+                  <Alert
+                    key={item.id}
+                    severity={type}
+                    action={
+                      <Link to="/agregar_atraso">
+                      <Button
+                        color="inherit"
+                        size="small"
+                        onClick={() => {
+                          console.log("Generar ticket para:", item.id);
+                        }}
+                      >
+                        Generar Ticket
+                      </Button>
+                      </Link>
+                    }
+                  >
+                    {type === "warning"
+                      ? `Por favor suba su solución y atienda el equipo (ID ${item.id})`
+                      : `¡Atención! El mantenimiento con ID ${item.id} ya venció sin solución.`}
+                  </Alert>
+                ))}
+              </Stack>
+            )}
         </div>
 
         <div className="d-flex justify-content-center align-items-center">
@@ -179,6 +236,7 @@ const Mantenimientos = () => {
                     <th>Administrador</th>
                     <th>Fecha Inicio</th>
                     <th>Fecha Fin</th>
+                    <th>Solución</th>
                     <th>Acciones</th>
                   </tr>
                 </thead>
@@ -202,6 +260,7 @@ const Mantenimientos = () => {
                         </td>
                         <td>{item.fecha_inicio ? new Date(item.fecha_inicio).toLocaleDateString("es-MX") : "-"}</td>
                         <td>{item.fecha_fin ? new Date(item.fecha_fin).toLocaleDateString("es-MX") : "-"}</td>
+                        <td>{ item.solucion }</td>
                         <td>
                           <Stack direction="row" spacing={1} justifyContent="center">
                             {/* Editar y eliminar solo para administrador */}
@@ -250,7 +309,7 @@ const Mantenimientos = () => {
                     ))
                   ) : (
                     <tr>
-                      <td colSpan="9">No se encontraron resultados.</td>
+                      <td colSpan="15">No se encontraron resultados.</td>
                     </tr>
                   )}
                 </tbody>

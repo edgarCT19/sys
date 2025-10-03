@@ -112,12 +112,6 @@ const Header = () => {
                 </ListItemIcon>
                 Mi perfil
               </MenuItem>
-              <MenuItem component={Link} to="#" onClick={handleCloseMyAccDr} className="menu-link">
-                <ListItemIcon>
-                  <Settings fontSize="small" />
-                </ListItemIcon>
-                Configuración
-              </MenuItem>
               <Divider />
               <MenuItem
                 onClick={logout}

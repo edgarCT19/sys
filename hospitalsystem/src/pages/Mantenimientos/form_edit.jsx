@@ -71,6 +71,7 @@ const Edit_Mantenimiento = () => {
     estado: "programado",
     tipo_servicio: "preventivo",
     descripcion: "",
+    solucion: "",
   });
 
   const [ingenieros, setIngenieros] = useState([]);
@@ -130,6 +131,7 @@ const Edit_Mantenimiento = () => {
           estado: mapEstadoFromAPI(mantenimiento.estado),
           tipo_servicio: mapServicioFromAPI(mantenimiento.tipo_servicio),
           descripcion: mantenimiento.descripcion || "",
+          solucion: mantenimiento.solucion || "",
         });
       } catch (err) {
         console.error(err);
@@ -217,7 +219,7 @@ const Edit_Mantenimiento = () => {
     <div className="right-content">
       <div className="card p-4">
         <Typography variant="h5" gutterBottom className="text-center">
-          Editar información de mantenimiento
+          Actualizar información de mantenimiento
         </Typography>
 
         {successMsg && <Alert severity="success">{successMsg}</Alert>}
@@ -238,131 +240,152 @@ const Edit_Mantenimiento = () => {
             "& .MuiInputLabel-root.Mui-focused": { color: "var(--color-secondary)" },
           }}
         >
-          {/* Administrador (solo lectura) */}
+          <div>
+          {user?.role === "administrador" && (
+            <>
+            {/* Administrador (solo lectura) */}
+            <div className="row mb-3">
+              <div className="col-12">
+                <TextField
+                  label="Administrador (ID - Nombre)"
+                  variant="outlined"
+                  value={`${user?.user?.id || ""} - ${user?.user?.nombres || ""} ${user?.user?.apellido_paterno || ""}`}
+                  InputProps={{ readOnly: true }}
+                  fullWidth
+                />
+              </div>
+            </div>
+
+            {/* Descripción */}
+            <div className="row mb-3">
+              <div className="col-12">
+                <TextField
+                  required
+                  fullWidth
+                  label="Descripción del servicio"
+                  variant="outlined"
+                  name="descripcion"
+                  value={formValues.descripcion}
+                  onChange={handleChange}
+                />
+              </div>
+            </div>
+
+            {/* Ingeniero y dispositivo */}
+            <div className="row mb-3">
+              <div className="col-md-6 mb-3">
+                <FormControl fullWidth required>
+                  <InputLabel>Ingeniero asignado</InputLabel>
+                  <Select
+                    name="ing_id"
+                    value={formValues.ing_id}
+                    onChange={handleChange}
+                  >
+                    {ingenieros.map((ing) => (
+                      <MenuItem key={ing.id} value={ing.id}>
+                        {ing.nombres} {ing.apellido_paterno}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </div>
+
+              <div className="col-md-6 mb-3">
+                <FormControl fullWidth required>
+                  <InputLabel>Dispositivo</InputLabel>
+                  <Select
+                    name="disp_med_id"
+                    value={formValues.disp_med_id}
+                    onChange={handleChange}
+                  >
+                    {dispositivos.map((disp) => (
+                      <MenuItem key={disp.id} value={disp.id}>
+                        {disp.equipo}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </div>
+            </div>
+
+            {/* Fechas */}
+            <div className="row mb-3">
+              <div className="col-md-6 mb-3">
+                <TextField
+                  required
+                  fullWidth
+                  label="Fecha de inicio"
+                  type="date"
+                  name="fecha_inicio"
+                  InputLabelProps={{ shrink: true }}
+                  value={formValues.fecha_inicio}
+                  onChange={handleChange}
+                />
+              </div>
+              <div className="col-md-6 mb-3">
+                <TextField
+                  required
+                  fullWidth
+                  label="Fecha de fin"
+                  type="date"
+                  name="fecha_fin"
+                  InputLabelProps={{ shrink: true }}
+                  value={formValues.fecha_fin}
+                  onChange={handleChange}
+                />
+              </div>
+            </div>
+
+            {/* Tipo de servicio */}
+            <div className="row mb-3">
+              <div className="col-md-6 mb-3">
+                <FormControl fullWidth required>
+                  <InputLabel>Tipo de servicio</InputLabel>
+                  <Select
+                    name="tipo_servicio"
+                    value={formValues.tipo_servicio}
+                    onChange={handleChange}
+                  >
+                    <MenuItem value="preventivo">Preventivo</MenuItem>
+                    <MenuItem value="correctivo">Correctivo</MenuItem>
+                  </Select>
+                </FormControl>
+              </div>
+            </div>
+
+            {/* Estado */}
+            <div className="row mb-3">
+              <div className="col-md-6 mb-3">
+                <FormControl fullWidth required>
+                  <InputLabel>Estado</InputLabel>
+                  <Select
+                    name="estado"
+                    value={formValues.estado}
+                    onChange={handleChange}
+                  >
+                    <MenuItem value="programado">Programado</MenuItem>
+                    <MenuItem value="en_proceso">En proceso</MenuItem>
+                    <MenuItem value="finalizado">Finalizado</MenuItem>
+                  </Select>
+                </FormControl>
+              </div>
+            </div>
+            </>
+          )}
+          </div>
+
+          {/* Solución */}
           <div className="row mb-3">
             <div className="col-12">
               <TextField
-                label="Administrador (ID - Nombre)"
+                required
+                fullWidth
+                label="Describe la solución aplicada"
                 variant="outlined"
-                value={`${user?.user?.id || ""} - ${user?.user?.nombres || ""} ${user?.user?.apellido_paterno || ""}`}
-                InputProps={{ readOnly: true }}
-                fullWidth
-              />
-            </div>
-          </div>
-
-          {/* Descripción */}
-          <div className="row mb-3">
-            <div className="col-12">
-              <TextField
-                required
-                fullWidth
-                label="Descripción del servicio"
-                variant="outlined"
-                name="descripcion"
-                value={formValues.descripcion}
+                name="solucion"
+                value={formValues.solucion}
                 onChange={handleChange}
               />
-            </div>
-          </div>
-
-          {/* Ingeniero y dispositivo */}
-          <div className="row mb-3">
-            <div className="col-md-6 mb-3">
-              <FormControl fullWidth required>
-                <InputLabel>Ingeniero asignado</InputLabel>
-                <Select
-                  name="ing_id"
-                  value={formValues.ing_id}
-                  onChange={handleChange}
-                >
-                  {ingenieros.map((ing) => (
-                    <MenuItem key={ing.id} value={ing.id}>
-                      {ing.nombres} {ing.apellido_paterno}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </div>
-
-            <div className="col-md-6 mb-3">
-              <FormControl fullWidth required>
-                <InputLabel>Dispositivo</InputLabel>
-                <Select
-                  name="disp_med_id"
-                  value={formValues.disp_med_id}
-                  onChange={handleChange}
-                >
-                  {dispositivos.map((disp) => (
-                    <MenuItem key={disp.id} value={disp.id}>
-                      {disp.equipo}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </div>
-          </div>
-
-          {/* Fechas */}
-          <div className="row mb-3">
-            <div className="col-md-6 mb-3">
-              <TextField
-                required
-                fullWidth
-                label="Fecha de inicio"
-                type="date"
-                name="fecha_inicio"
-                InputLabelProps={{ shrink: true }}
-                value={formValues.fecha_inicio}
-                onChange={handleChange}
-              />
-            </div>
-            <div className="col-md-6 mb-3">
-              <TextField
-                required
-                fullWidth
-                label="Fecha de fin"
-                type="date"
-                name="fecha_fin"
-                InputLabelProps={{ shrink: true }}
-                value={formValues.fecha_fin}
-                onChange={handleChange}
-              />
-            </div>
-          </div>
-
-          {/* Tipo de servicio */}
-          <div className="row mb-3">
-            <div className="col-md-6 mb-3">
-              <FormControl fullWidth required>
-                <InputLabel>Tipo de servicio</InputLabel>
-                <Select
-                  name="tipo_servicio"
-                  value={formValues.tipo_servicio}
-                  onChange={handleChange}
-                >
-                  <MenuItem value="preventivo">Preventivo</MenuItem>
-                  <MenuItem value="correctivo">Correctivo</MenuItem>
-                </Select>
-              </FormControl>
-            </div>
-          </div>
-
-          {/* Estado */}
-          <div className="row mb-3">
-            <div className="col-md-6 mb-3">
-              <FormControl fullWidth required>
-                <InputLabel>Estado</InputLabel>
-                <Select
-                  name="estado"
-                  value={formValues.estado}
-                  onChange={handleChange}
-                >
-                  <MenuItem value="programado">Programado</MenuItem>
-                  <MenuItem value="en_proceso">En proceso</MenuItem>
-                  <MenuItem value="finalizado">Finalizado</MenuItem>
-                </Select>
-              </FormControl>
             </div>
           </div>
 
@@ -379,7 +402,7 @@ const Edit_Mantenimiento = () => {
                   "&:hover": { backgroundColor: "var(--color-primary)" },
                 }}
               >
-                {loading ? "Guardando..." : "ACTUALIZAR MANTENIMIENTO"}
+                {loading ? "Guardando..." : "GUARDAR INFORMACIÓN"}
               </Button>
             </div>
           </div>
